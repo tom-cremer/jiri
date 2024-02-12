@@ -1,29 +1,16 @@
 <?php
-    $jiris = [
-            [
-                'id'=>1,
-                'name'=>'Projet Web 2025',
-                'starting_at'=>DateTimeImmutable::createFromFormat("j-M-Y", "14-Juin-2025")
-            ],
-            [
-                'id'=>2,
-                'name'=>'Projet Web 2026',
-                'starting_at'=>DateTimeImmutable::createFromFormat("j-M-Y", "18-Juin-2026")
-            ],
-            [
-                'id'=>3,
-                'name'=>'Design Web 2025',
-                'starting_at'=>DateTimeImmutable::createFromFormat("j-M-Y", "12-Jan-2025")
-            ],
-            [
-                'id'=>4,
-                'name'=>'Design Web 2026',
-                'starting_at'=>DateTimeImmutable::createFromFormat("j-M-Y", "16-Jan-2026")
-            ]
 
-    ];
+if (file_exists(__DIR__ . "/database/database.php")) {
+    require __DIR__ . "/database/database.php";
+} else {
+    die('Error 404: Problème de fichier');
+}
 
-// branche feature et develop, puis fusionné avec une pull request
+$db = getPDO();
+$passed_jiris = $db->query("select * from jiris where starting_at < current_timestamp order by starting_at desc");
+$upcoming_jiris = $db->query("select * from jiris where starting_at > current_timestamp order by starting_at desc");
+
+
 ?>
 
 <!doctype>
@@ -52,10 +39,10 @@
 
     <section>
         <h2 class="font-bold">Jiri à venir</h2>
-        <?php if ($jiris): ?>
+        <?php if ($passed_jiris): ?>
             <ol>
-                <?php foreach ($jiris as $jiri): ?>
-                    <li><a href="/jiri?id=<?= $jiri['id'] ?>"><?= $jiri['name'] ?></a></li>
+                <?php foreach ($passed_jiris as $jiri): ?>
+                    <li><a class='text-blue-400' href="/jiris?id=<?= $jiri->id ?>"><?= $jiri->name ?></a></li>
                 <?php endforeach ?>
             </ol>
         <?php endif ?>
@@ -63,10 +50,13 @@
 
     <section>
         <h2 class="font-bold">Jiri à Passées</h2>
-        <ol>
-            <li><a href="/jiri?id=3">Projets Web 2023</a></li>
-            <li><a href="/jiri?id=4">Design Web 2023</a></li>
-        </ol>
+        <?php if ($upcoming_jiris): ?>
+            <ol>
+                <?php foreach ($upcoming_jiris as $jiri): ?>
+                    <li><a class='text-blue-400' href="/jiris?id=<?= $jiri->id ?>"><?= $jiri->name ?></a></li>
+                <?php endforeach ?>
+            </ol>
+        <?php endif ?>
     </section>
 </main>
 
